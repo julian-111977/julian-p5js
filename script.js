@@ -1,3 +1,6 @@
+
+  
+
 class Raster {
   constructor(r,k) {
     this.aantalRijen = r;
@@ -12,16 +15,24 @@ class Raster {
   teken() {
     push();
     noFill();
-    stroke('grey');
+    //maak de vakjes
     for (var rij = 0;rij < this.aantalRijen;rij++) {
       for (var kolom = 0;kolom < this.aantalKolommen;kolom++) {
+        //blauwe randen
+        if (rij == 0 || rij == this.aantalRijen - 1 ||
+          kolom == 0 || kolom == this.aantalKolommen - 1) {
+          stroke('blue');
+        } else {
+          stroke('grey');
+        }
         rect(kolom*this.celGrootte,rij*this.celGrootte,this.celGrootte,this.celGrootte);
       }
     }
+
     pop();
   }
 }
-
+  
 class Jos {
   constructor() {
     this.x = 400;
@@ -33,19 +44,24 @@ class Jos {
   }
 
   beweeg() {
-    if (keyIsDown(LEFT_ARROW)) {
+    //links
+    if (keyIsDown(65)) {
       this.x -= this.stapGrootte;
       this.frameNummer = 2;
     }
-    if (keyIsDown(RIGHT_ARROW)) {
+    //rechts
+    if (keyIsDown(68)) {
       this.x += this.stapGrootte;
       this.frameNummer = 1;
     }
-    if (keyIsDown(UP_ARROW)) {
+
+    //omhoog
+    if (keyIsDown(87)) {
       this.y -= this.stapGrootte;
       this.frameNummer = 4;
     }
-    if (keyIsDown(DOWN_ARROW)) {
+    //omlaag
+    if (keyIsDown(83)) {
       this.y += this.stapGrootte;
       this.frameNummer = 5;
     }
@@ -103,8 +119,9 @@ function setup() {
   frameRate(10);
   textFont("Verdana");
   textSize(90);
+  
 
-  raster = new Raster(6,9);
+  raster = new Raster(12,18);
 
   raster.berekenCelGrootte();
 
@@ -122,6 +139,10 @@ function setup() {
   bob = new Vijand(600,400);
   bob.stapGrootte = 1*eve.stapGrootte;
   bob.sprite = loadImage("images/sprites/Bob100px/Bob.png");  
+
+  cindy = new Vijand(650,300)
+  cindy.stapGrootte = 1*eve.stapGrootte
+  cindy.sprite = loadImage("images/sprites/Bob100px/Bob.png")
 }
 
 function draw() {
@@ -133,6 +154,9 @@ function draw() {
   eve.toon();
   alice.toon();
   bob.toon();
+  cindy.beweeg();
+  cindy.toon();
+    
 
   if (eve.wordtGeraakt(alice) || eve.wordtGeraakt(bob)) {
     noLoop();
