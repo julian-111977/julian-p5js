@@ -2,7 +2,7 @@
 var aantallagen = 10;
 var breedte;
 var hoogte;
-var canvas
+var canvas;
 
 var aantalLevens = 3;
 var raster;
@@ -16,6 +16,11 @@ var brug;
 var raket1;
 var raket2;
 var raket3;
+
+var spelAfgelopen = false;
+var gewonnen = false;
+var achtergrondKleur = null;
+var knopX, knopY, knopBreedte, knopHoogte;
 
 class Raster {
   constructor(r,k) {
@@ -39,8 +44,10 @@ class Raster {
         if (rij == 0 || rij == this.aantalRijen - 1 ||
           kolom == 0 || kolom == this.aantalKolommen - 1) {
           stroke('blue');
+          strokeWeight(5);
         } else {
           stroke('grey');
+          strokeWeight(1);
         }
         rect(kolom*this.celGrootte,
              rij*this.celGrootte,
@@ -350,7 +357,11 @@ function setup() {
 }
 
 function draw() {
-  background(brug);
+  if (muisOpBlauweRand()) {
+    background("lightblue");
+  }else {
+    background(brug);
+  }
 
   push();
   
@@ -409,27 +420,24 @@ function draw() {
 
   eve.x = 250;
   eve.y = 250;
-
+ }
   if (aantalLevens <= 0) {
-    background('red');
-    fill('white');
-    textSize(40);
-    text("Game Over!", 300, 300);
+    spelAfgelopen = true;
+    gewonnen = false;
+    toonEindscherm(gewonnen);
     noLoop();
     return;
    }
-  }
 
   if (eve.gehaald) {
-    background('green');
-    
-    fill('white');
-    textSize(40);
-    text("Je hebt gewonnen!",250,300);
-    
+    spelAfgelopen = true;
+    gewonnen = true;
+    toonEindscherm(gewonnen);
     noLoop();
+    return;
   }
 }
+
 
 function tekenPiramide(n) {
   if (n>0) {
@@ -445,3 +453,116 @@ function tekenPiramide(n) {
     tekenPiramide(n - 1);
   }
 }
+    
+function muisOpBlauweRand() {
+  if (
+    mouseX < 0 ||
+    mouseX >= canvas.width ||
+    mouseY < 0 ||
+    mouseY >= canvas.height
+  ){
+    return false;
+  }
+
+  var kolom = floor(mouseX / raster.celGrootte);
+  var rij = floor(mouseY / raster.celGrootte);
+
+  return(
+    rij == 0 ||
+    rij == raster.aantalRijen - 1 ||
+    kolom == 0 ||
+    kolom == raster.aantalKolommen - 1
+  );
+}
+    
+function toonEindscherm(isGewonnen) {
+  if (isGewonnen){
+    background("green");
+  }
+  else {
+    background("red");
+  }
+  push();
+
+  fill("white");
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(40);
+
+  if (isGewonnen) {
+    text("Je hebt gewonnen!", canvas.width / 2, 220)
+  }
+  else {
+    text("Game Over!", canvas.width / 2, 220)
+  }
+
+  //knop
+  knopBreedte = 240;
+  knopHoogte = 60;
+  knopX = (canvas.width - knopBreedte) / 2;
+  knopY = 320;
+
+  //tekenen knop
+  fill("white");
+  stroke("black");
+  strokeWeight(2);
+  rect(knopX, knopY, knopBreedte, knopHoogte, 10);
+
+  fill("black");
+  noStroke();
+  textSize(22);
+  text(
+    "Opnieuw spelen",
+    knopX + knopBreedte / 2,
+    knopY + knopHoogte / 2
+  );
+
+  pop();
+}
+
+function mousePressed() {
+  if (!spelAfgelopen){
+    return;
+  }
+  
+  if (
+    mouseX >= knopX &&
+    mouseX <= knopX + knopBreedte &&
+    mouseY >= knopY &&
+    mouseY <= knopY + knopHoogte
+  ) {
+    resetSpel();
+  }
+}
+function resetSpel(){
+  aantalLevens = 3;
+  spelAfgelopen = false;
+  gewonnen = false;
+
+  eve = new Jos();
+  eve.stapGrootte = raster.celGrootte;
+  for (var b = 0;b < 6;b++) {
+    frameEve = loadImage("images/sprites/Eve100px/Eve_" + b + ".png");
+    eve.animatie.push(frameEve);
+  }
+
+  alice = new Vijand(700,200);
+  alice.stapGrootte = 1*eve.stapGrootte;
+  alice.sprite = loadImage("images/sprites/Alice100px/Alice.png");
+
+  bob = new Vijand(600,400);
+  bob.stapGrootte = 1*eve.stapGrootte;
+  bob.sprite = loadImage("images/sprites/Bob100px/Bob.png");  
+
+  cindy = new Vijand(650,300)
+  cindy.stapGrootte = 1*eve.stapGrootte
+  cindy.sprite = loadImage("images/sprites/Bob100px/Bob.png")
+  pingpongbal = new Pingpongbal();
+
+  raket1 = new Raket();
+  raket2 = new Raket();
+  raket3 = new Raket();
+
+  loop();  
+}
+  
