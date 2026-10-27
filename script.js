@@ -10,6 +10,11 @@ var alice;
 var bob;
 var cindy;
 var pingpongbal;
+var Brug;
+
+var raket1;
+var raket2;
+var raket3;
 
 class Raster {
   constructor(r,k) {
@@ -26,7 +31,7 @@ class Raster {
   teken() {
     push();
     noFill();
-    //maak de vakjes
+    //maakt de vakjes
     for (var rij = 0;rij < this.aantalRijen;rij++) {
       for (var kolom = 0;kolom < this.aantalKolommen;kolom++) {
         //blauwe randen
@@ -36,7 +41,10 @@ class Raster {
         } else {
           stroke('grey');
         }
-        rect(kolom*this.celGrootte,rij*this.celGrootte,this.celGrootte,this.celGrootte);
+        rect(kolom*this.celGrootte,
+             rij*this.celGrootte,
+             this.celGrootte,
+             this.celGrootte);
       }
     }
 
@@ -88,22 +96,30 @@ class Jos {
   wordtGeraakt(vijand) {
     var d = dist(
       this.x + Raster.celGrootte / 2,
-      this.y + raster.celGrootte / 2,
-      vijand.x + raster.celGrootte /2,
-      vijand.y);
-    if (d < raster.celGrootte / 2) {
-      return true;
-    }
-    return false;
+      this.y + Raster.celGrootte / 2,
+      vijand.x + Raster.celGrootte /2,
+      vijand.y + Raster.celGrootte /2
+    );
+    
+    return d < raster.celGrootte;
     }
   
 
   toon() {
-    image(this.animatie[this.frameNummer],this.x,this.y,raster.celGrootte,raster.celGrootte);
+    if(this.animatie[this.frameNummer]){
+      image(
+        this.animatie[this.frameNummer],
+        this.x,
+        this.y,
+        raster.celGrootte,
+        raster.celGrootte
+      );
+    }
+  }
   }
 
 
-class Vijand {//Wat moet ik hier doen om te fixen??
+class Vijand {
   constructor(x,y) {
     this.x = x;
     this.y = y;
@@ -115,14 +131,173 @@ class Vijand {//Wat moet ik hier doen om te fixen??
     this.x += floor(random(-1,2))*this.stapGrootte;
     this.y += floor(random(-1,2))*this.stapGrootte;
 
-    this.x = constrain(this.x,0,canvas.width - raster.celGrootte);
-    this.y = constrain(this.y,0,canvas.height - raster.celGrootte);
+    this.x = constrain(this.x,0,canvas.width - Raster.celGrootte);
+    this.y = constrain(this.y,0,canvas.height - Raster.celGrootte);
   }
 
   toon() {
-    image(this.sprite,this.x,this.y,raster.celGrootte,raster.celGrootte);
+    if (this.sprite) {
+      Image(
+        this.sprite, this.x, this.y, Raster.celGrootte,Raster.celGrootte
+      );
+    }
   }
 }
+
+class pingpongbal {
+  constructor() {
+    this.kolom = floor(random(2,Raster.aantalKolommen - 2));
+    this.rij = floor(random(2,Raster.aantalRijen));
+
+    this.x = this.kolom * Raster.celGrootte;
+    this.y = this.rij * Raster.celGrootte;
+
+    this.richtingX = random([-1,1]);
+    this.richtingY = random([-1,1]);
+    
+    this.actief = true; 
+    this.teller = 0;
+    this.wachttijd = 3;
+  }
+
+  beweeg() {
+    if(!this.actief) {
+      return;
+    }
+    this.teller++;
+
+    if (this.teller < this.wachttijd) {
+      return;
+    }
+
+    this.teller = 0;
+
+    this.kolom += this.richtingX
+    this.rij += this.richtingY;
+
+    if (
+      this.kolom <= 1 ||
+      this.kolom >= raster.aantalKolommen - 2)
+    {
+      this.richtingX *= -1;
+      this.kolom += this.richting * 2
+    }
+    if(
+      this.rij<= 1 ||
+      this.rij >= Raster.aantalRijen - 2
+    ){
+      this.richtingY *= -1;
+      this.rij += this.richtingY * 2
+    }
+    this.kolom = constrain(
+      this.kolom, 1, Raster.aantalKolommen -2
+    );
+
+    this.rij = constrain(
+      this.rij, 1, Raster.aantalRijen -2
+    );
+
+    this.x = this.kolom * Raster.celGrootte;
+    this.y = this.kolom * Raster.celGrootte;
+  }
+
+  toon() {
+    if (this.actief){
+      push();
+
+      fill("orange");
+      stroke("black");
+      strokeWeight(2);
+
+      ellipse(
+        this.x + Raster.celGrootte /2,
+        this.y + Raster.celGrootte /2,
+        Raster.celGrootte * 0.6
+      );
+
+      pop();
+    }
+  }
+
+  checkPakOp(speler) {
+    if (!this.actief) {
+      return;
+    }
+      var d = dist(
+        speler.x + Raster.celGrootte / 2,
+        speler.y + Raster.celGrootte /2, 
+        this.x + Raster.celGrootte,
+        this.y + Raster.celGrootte
+      );
+      if (d < Raster.celGrootte){
+        aantalLevens++;
+        this.actief = false;
+      }
+    }
+  }
+
+class Raket {
+  constructor() {
+    var kolom = floor(random(10,17));
+
+    this.x = kolom * Raster.celGrootte;
+    this.y = floor(random(1, Raster.aantalRijen - 2)) * Raster.celGrootte;
+
+    this.snelheid = random(1, 3);
+    this.valversnelling = 0.15;
+    this.richting = random([-1, 1]);
+
+    this.sprite = loadImage("images/sprites/raket.png");
+  }
+}
+
+  beweeg() {
+  this.snelheid += this.valversnelling;
+
+  this.y += this.richting * this.snelheid;
+
+  if (this.y <= 0) {
+    this.y = 0;
+    this.richting = 1;
+    this.snelheid = 0.5;
+  }
+}
+
+  toon() {
+  if (this.sprite) {
+    image(
+      this.sprite, this.x, this.y, Raster.celGrootte, Raster.celGrootte
+    );
+  } else {
+    push();
+
+    fill("red");
+    stroke("white");
+
+    triangel(
+      this.x + Raster.celGrootte / 2, 
+      this.y,
+      this.x,
+      this.y + Raster.celGrootte,
+      this.x + Raster.celGrootte,
+      this.y + Raster.celGrootte
+    );
+
+    pop();
+  }
+}
+
+  wordtGeraakt(speler){
+  var d = dist(
+    speler.x + Raster.celGrootte /2,
+    speler.y + Raster.celGrootte /2,
+    this.x + Raster.celGrootte / 2,
+    this.y + Raster.celGrootte / 2
+  );
+  
+  return d < Raster.celGrootte;
+} 
+
 
 function preload() {
   brug = loadImage("images/backgrounds/dame_op_brug_1800.jpg");
@@ -229,12 +404,7 @@ function tekenPiramide(n) {
     tekenPiramide(n);
   }
 
-class pingpongbal {
-  constructor() {
-    this.x = floor(random(2,15))*50; //random vakje kiezen
-    this.y = floor(random(2,16))*50;
-    this.actief = true; 
-  }
+
 toon(){
   if (this.actief) {
     push();
@@ -245,15 +415,7 @@ toon(){
     pop();
   }
 }
-checkPakOp(speler) {
-  if (this.actief) {
-    var d = dist(speler.x, speler.y, this.x, this.y);
-    if (d < raster.celGrootte / 2){
-      aantalLevens++;
-      this.actief = false;
-    }
-  }
-}
+
 
 }
   
