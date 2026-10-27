@@ -101,7 +101,7 @@ class Jos {
       vijand.y + Raster.celGrootte /2
     );
     
-    return d < raster.celGrootte;
+    return d < Raster.celGrootte;
     }
   
 
@@ -111,8 +111,8 @@ class Jos {
         this.animatie[this.frameNummer],
         this.x,
         this.y,
-        raster.celGrootte,
-        raster.celGrootte
+        Raster.celGrootte,
+        Raster.celGrootte
       );
     }
   }
@@ -172,15 +172,15 @@ class pingpongbal {
 
     this.teller = 0;
 
-    this.kolom += this.richtingX
+    this.kolom += this.richtingX;
     this.rij += this.richtingY;
 
     if (
       this.kolom <= 1 ||
-      this.kolom >= raster.aantalKolommen - 2)
+      this.kolom >= Raster.aantalKolommen - 2)
     {
       this.richtingX *= -1;
-      this.kolom += this.richting * 2
+      this.kolom += this.richtingX * 2;
     }
     if(
       this.rij<= 1 ||
@@ -248,56 +248,62 @@ class Raket {
     this.richting = random([-1, 1]);
 
     this.sprite = loadImage("images/sprites/raket.png");
-  }
-}
+  }  
+  
 
   beweeg() {
-  this.snelheid += this.valversnelling;
+    this.snelheid += this.valversnelling;
 
-  this.y += this.richting * this.snelheid;
+    this.y += this.richting * this.snelheid;
 
-  if (this.y <= 0) {
-    this.y = 0;
-    this.richting = 1;
-    this.snelheid = 0.5;
-  }
-}
+    if (this.y <= 0) {
+      this.y = 0;
+      this.richting = 1;
+      this.snelheid = 0.5;
+    }
+
+    if(this.y >= canvas.height - Raster.celGrootte) {
+      this.y = canvas.height - Raster.celGrootte;
+      this.richting = -1;
+      this.snelheid = 0.5;
+    }
+  }  
 
   toon() {
-  if (this.sprite) {
-    image(
-      this.sprite, this.x, this.y, Raster.celGrootte, Raster.celGrootte
-    );
-  } else {
-    push();
+    if (this.sprite) {
+      image(
+        this.sprite, this.x, this.y, Raster.celGrootte, Raster.celGrootte
+      );
+    } else {
+      push();
 
-    fill("red");
-    stroke("white");
+      fill("red");
+      stroke("white");
 
-    triangel(
-      this.x + Raster.celGrootte / 2, 
-      this.y,
-      this.x,
-      this.y + Raster.celGrootte,
-      this.x + Raster.celGrootte,
-      this.y + Raster.celGrootte
-    );
+      triangle(
+        this.x + Raster.celGrootte / 2, 
+        this.y,
+        this.x,
+        this.y + Raster.celGrootte,
+        this.x + Raster.celGrootte,
+        this.y + Raster.celGrootte
+      );
 
-    pop();
+      pop();
+    }
   }
-}
 
-  wordtGeraakt(speler){
-  var d = dist(
-    speler.x + Raster.celGrootte /2,
-    speler.y + Raster.celGrootte /2,
-    this.x + Raster.celGrootte / 2,
-    this.y + Raster.celGrootte / 2
-  );
+  wordtGeraakt(speler) {
+    var d = dist(
+      speler.x + Raster.celGrootte /2,
+      speler.y + Raster.celGrootte /2,
+      this.x + Raster.celGrootte / 2,
+      this.y + Raster.celGrootte / 2
+    );
   
-  return d < Raster.celGrootte;
+    return d < Raster.celGrootte;
+  }
 } 
-
 
 function preload() {
   brug = loadImage("images/backgrounds/dame_op_brug_1800.jpg");
@@ -305,7 +311,6 @@ function preload() {
 
 function setup() {
   canvas = createCanvas(900,600);
-  canvas.parent();
   frameRate(10);
   textFont("Verdana");
   textSize(90);
@@ -314,12 +319,12 @@ function setup() {
   breedte = 900 / aantallagen
   hoogte = breedte / 2
 
-  raster = new Raster(12,18);
+  Raster = new Raster(12,18);
 
-  raster.berekenCelGrootte();
+  Raster.berekenCelGrootte();
 
   eve = new Jos();
-  eve.stapGrootte = 1*raster.celGrootte;
+  eve.stapGrootte = Raster.celGrootte;
   for (var b = 0;b < 6;b++) {
     frameEve = loadImage("images/sprites/Eve100px/Eve_" + b + ".png");
     eve.animatie.push(frameEve);
@@ -337,16 +342,22 @@ function setup() {
   cindy.stapGrootte = 1*eve.stapGrootte
   cindy.sprite = loadImage("images/sprites/Bob100px/Bob.png")
   pingpongbal = new Pingpongbal();
+
+  raket1 = new Raket();
+  raket2 = new Raket();
+  raket3 = new Raket();
 }
 
 function draw() {
   background(brug);
 
   push();
+  
   fill('lightgray')
   stroke('darkgrey')
-  translate(0, 0);
+  
   tekenPiramide(aantallagen);
+  
   pop();
   
   raster.teken();
@@ -354,25 +365,45 @@ function draw() {
   eve.beweeg();
   alice.beweeg();
   bob.beweeg();
+  cindy.beweeg();
+
+  pingpongbal.beweeg();
+
+  raket1.beweeg();
+  raket2.beweeg();
+  raket3.beweeg();
+  
   eve.toon();
   alice.toon();
   bob.toon();
-  cindy.beweeg();
   cindy.toon();
 
   pingpongbal.checkPakOp(eve);
   pingpongbal.toon();
 
+  raket1.toon();
+  raket2.toon();
+  raket3.toon();
+
   push();
+  
   textSize(24);
   fill('white');
   stroke('black');
   strokeWeight(4);
   text("Levens: " + aantalLevens , 20, 30);
+  
   pop();
     
 
-  if (eve.wordtGeraakt(alice) || eve.wordtGeraakt(bob) || eve.wordtGeraakt(cindy)) {
+  if (
+    eve.wordtGeraakt(alice) || 
+    eve.wordtGeraakt(bob) || 
+    eve.wordtGeraakt(cindy) ||
+    raket1.wordtGeraakt(eve) ||
+    raket2.wordtGeraakt(eve) ||
+    raket3.wordtGeraakt(eve)
+  ) {
     aantalLevens--;
 
   eve.x = 250;
@@ -381,43 +412,35 @@ function draw() {
   if (aantalLevens <= 0) {
     background('red');
     fill('white');
-    textSize(60);
-    text("Game Over!", 250, 300);
+    textSize(40);
+    text("Game Over!", 300, 300);
     noLoop();
-  }
+    return;
+   }
   }
 
   if (eve.gehaald) {
     background('green');
+    
     fill('white');
-    text("Je hebt gewonnen!",30,300);
+    textSize(40);
+    text("Je hebt gewonnen!",250,300);
+    
     noLoop();
   }
 }
+
 function tekenPiramide(n) {
   if (n>0) {
     for (var nr=0;nr<n; nr++){
-      rect(nr*breedte, 0,breedte ,hoogte);
+      rect(nr*breedte, 
+           0,
+           breedte,
+           hoogte
+          );
     }
     translate(breedte / 2, hoogte);
-    n--;
-    tekenPiramide(n);
-  }
-
-
-toon(){
-  if (this.actief) {
-    push();
-    fill('orange'); 
-    stroke('black');
-    strokeWeight(2);
-    SVGEllipseElement(this.x + raster.celGrootte/2, this.y + raster.celGrootte/2, raster.celGrootte * 0.6);
-    pop();
-  }
-}
-
-
-}
   
-
+    tekenPiramide(n - 1);
+  }
 }
