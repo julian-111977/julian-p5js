@@ -1,5 +1,15 @@
+//voor piramide
+var aantallagen = 10;
+var breedte;
+var hoogte;
 
-  
+var aantalLevens = 3;
+var raster;
+var eve;
+var alice;
+var bob;
+var cindy;
+var pingpongbal;
 
 class Raster {
   constructor(r,k) {
@@ -7,6 +17,7 @@ class Raster {
     this.aantalKolommen = k;
     this.celGrootte = null;
   }
+  
 
   berekenCelGrootte() {
     this.celGrootte = canvas.width / this.aantalKolommen;
@@ -66,29 +77,33 @@ class Jos {
       this.frameNummer = 5;
     }
 
-    this.x = constrain(this.x,0,canvas.width);
-    this.y = constrain(this.y,0,canvas.height - raster.celGrootte);
+    this.x = constrain(this.x,0,canvas.width -Raster.celGrootte);
+    this.y = constrain(this.y,0,canvas.height - Raster.celGrootte);
 
-    if (this.x == canvas.width) {
+    if (this.x >= canvas.width - Raster.celGrootte) {
       this.gehaald = true;
     }
   }
 
   wordtGeraakt(vijand) {
-    if (this.x == vijand.x && this.y == vijand.y) {
+    var d = dist(
+      this.x + Raster.celGrootte / 2,
+      this.y + raster.celGrootte / 2,
+      vijand.x + raster.celGrootte /2,
+      vijand.y);
+    if (d < raster.celGrootte / 2) {
       return true;
     }
-    else {
-      return false;
+    return false;
     }
-  }
+  
 
   toon() {
     image(this.animatie[this.frameNummer],this.x,this.y,raster.celGrootte,raster.celGrootte);
   }
-}  
 
-class Vijand {
+
+class Vijand {//Wat moet ik hier doen om te fixen??
   constructor(x,y) {
     this.x = x;
     this.y = y;
@@ -120,6 +135,9 @@ function setup() {
   textFont("Verdana");
   textSize(90);
   
+//voor piramide
+  breedte = 900 / aantallagen
+  hoogte = breedte / 2
 
   raster = new Raster(12,18);
 
@@ -143,11 +161,21 @@ function setup() {
   cindy = new Vijand(650,300)
   cindy.stapGrootte = 1*eve.stapGrootte
   cindy.sprite = loadImage("images/sprites/Bob100px/Bob.png")
+  pingpongbal = new Pingpongbal();
 }
 
 function draw() {
   background(brug);
+
+  push();
+  fill('lightgray')
+  stroke('darkgrey')
+  translate(0, 0);
+  tekenPiramide(aantallagen);
+  pop();
+  
   raster.teken();
+  
   eve.beweeg();
   alice.beweeg();
   bob.beweeg();
@@ -156,10 +184,32 @@ function draw() {
   bob.toon();
   cindy.beweeg();
   cindy.toon();
+
+  pingpongbal.checkPakOp(eve);
+  pingpongbal.toon();
+
+  push();
+  textSize(24);
+  fill('white');
+  stroke('black');
+  strokeWeight(4);
+  text("Levens: " + aantalLevens , 20, 30);
+  pop();
     
 
-  if (eve.wordtGeraakt(alice) || eve.wordtGeraakt(bob)) {
+  if (eve.wordtGeraakt(alice) || eve.wordtGeraakt(bob) || eve.wordtGeraakt(cindy)) {
+    aantalLevens--;
+
+  eve.x = 250;
+  eve.y = 250;
+
+  if (aantalLevens <= 0) {
+    background('red');
+    fill('white');
+    textSize(60);
+    text("Game Over!", 250, 300);
     noLoop();
+  }
   }
 
   if (eve.gehaald) {
@@ -168,4 +218,44 @@ function draw() {
     text("Je hebt gewonnen!",30,300);
     noLoop();
   }
+}
+function tekenPiramide(n) {
+  if (n>0) {
+    for (var nr=0;nr<n; nr++){
+      rect(nr*breedte, 0,breedte ,hoogte);
+    }
+    translate(breedte / 2, hoogte);
+    n--;
+    tekenPiramide(n);
+  }
+
+class pingpongbal {
+  constructor() {
+    this.x = floor(random(2,15))*50; //random vakje kiezen
+    this.y = floor(random(2,16))*50;
+    this.actief = true; 
+  }
+toon(){
+  if (this.actief) {
+    push();
+    fill('orange'); 
+    stroke('black');
+    strokeWeight(2);
+    SVGEllipseElement(this.x + raster.celGrootte/2, this.y + raster.celGrootte/2, raster.celGrootte * 0.6);
+    pop();
+  }
+}
+checkPakOp(speler) {
+  if (this.actief) {
+    var d = dist(speler.x, speler.y, this.x, this.y);
+    if (d < raster.celGrootte / 2){
+      aantalLevens++;
+      this.actief = false;
+    }
+  }
+}
+
+}
+  
+
 }
