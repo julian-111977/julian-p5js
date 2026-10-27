@@ -2,6 +2,7 @@
 var aantallagen = 10;
 var breedte;
 var hoogte;
+var canvas
 
 var aantalLevens = 3;
 var raster;
@@ -10,7 +11,7 @@ var alice;
 var bob;
 var cindy;
 var pingpongbal;
-var Brug;
+var brug;
 
 var raket1;
 var raket2;
@@ -85,23 +86,23 @@ class Jos {
       this.frameNummer = 5;
     }
 
-    this.x = constrain(this.x,0,canvas.width -Raster.celGrootte);
-    this.y = constrain(this.y,0,canvas.height - Raster.celGrootte);
+    this.x = constrain(this.x,0,canvas.width -raster.celGrootte);
+    this.y = constrain(this.y,0,canvas.height - raster.celGrootte);
 
-    if (this.x >= canvas.width - Raster.celGrootte) {
+    if (this.x >= canvas.width - raster.celGrootte) {
       this.gehaald = true;
     }
   }
 
   wordtGeraakt(vijand) {
     var d = dist(
-      this.x + Raster.celGrootte / 2,
-      this.y + Raster.celGrootte / 2,
-      vijand.x + Raster.celGrootte /2,
-      vijand.y + Raster.celGrootte /2
+      this.x + raster.celGrootte / 2,
+      this.y + raster.celGrootte / 2,
+      vijand.x + raster.celGrootte /2,
+      vijand.y + raster.celGrootte /2
     );
     
-    return d < Raster.celGrootte;
+    return d < raster.celGrootte;
     }
   
 
@@ -111,8 +112,8 @@ class Jos {
         this.animatie[this.frameNummer],
         this.x,
         this.y,
-        Raster.celGrootte,
-        Raster.celGrootte
+        raster.celGrootte,
+        raster.celGrootte
       );
     }
   }
@@ -131,26 +132,26 @@ class Vijand {
     this.x += floor(random(-1,2))*this.stapGrootte;
     this.y += floor(random(-1,2))*this.stapGrootte;
 
-    this.x = constrain(this.x,0,canvas.width - Raster.celGrootte);
-    this.y = constrain(this.y,0,canvas.height - Raster.celGrootte);
+    this.x = constrain(this.x,0,canvas.width - raster.celGrootte);
+    this.y = constrain(this.y,0,canvas.height - raster.celGrootte);
   }
 
   toon() {
     if (this.sprite) {
-      Image(
-        this.sprite, this.x, this.y, Raster.celGrootte,Raster.celGrootte
+      image(
+        this.sprite, this.x, this.y, raster.celGrootte,raster.celGrootte
       );
     }
   }
 }
 
-class pingpongbal {
+class Pingpongbal {
   constructor() {
-    this.kolom = floor(random(2,Raster.aantalKolommen - 2));
-    this.rij = floor(random(2,Raster.aantalRijen));
+    this.kolom = floor(random(2,raster.aantalKolommen - 2));
+    this.rij = floor(random(2,raster.aantalRijen));
 
-    this.x = this.kolom * Raster.celGrootte;
-    this.y = this.rij * Raster.celGrootte;
+    this.x = this.kolom * raster.celGrootte;
+    this.y = this.rij * raster.celGrootte;
 
     this.richtingX = random([-1,1]);
     this.richtingY = random([-1,1]);
@@ -177,28 +178,28 @@ class pingpongbal {
 
     if (
       this.kolom <= 1 ||
-      this.kolom >= Raster.aantalKolommen - 2)
+      this.kolom >= raster.aantalKolommen - 2)
     {
       this.richtingX *= -1;
       this.kolom += this.richtingX * 2;
     }
     if(
       this.rij<= 1 ||
-      this.rij >= Raster.aantalRijen - 2
+      this.rij >= raster.aantalRijen - 2
     ){
       this.richtingY *= -1;
       this.rij += this.richtingY * 2
     }
     this.kolom = constrain(
-      this.kolom, 1, Raster.aantalKolommen -2
+      this.kolom, 1, raster.aantalKolommen -2
     );
 
     this.rij = constrain(
-      this.rij, 1, Raster.aantalRijen -2
+      this.rij, 1, raster.aantalRijen -2
     );
 
-    this.x = this.kolom * Raster.celGrootte;
-    this.y = this.kolom * Raster.celGrootte;
+    this.x = this.kolom * raster.celGrootte;
+    this.y = this.rij * raster.celGrootte;
   }
 
   toon() {
@@ -240,8 +241,8 @@ class Raket {
   constructor() {
     var kolom = floor(random(10,17));
 
-    this.x = kolom * Raster.celGrootte;
-    this.y = floor(random(1, Raster.aantalRijen - 2)) * Raster.celGrootte;
+    this.x = kolom * raster.celGrootte;
+    this.y = floor(random(1, raster.aantalRijen - 2)) * raster.celGrootte;
 
     this.snelheid = random(1, 3);
     this.valversnelling = 0.15;
@@ -262,8 +263,8 @@ class Raket {
       this.snelheid = 0.5;
     }
 
-    if(this.y >= canvas.height - Raster.celGrootte) {
-      this.y = canvas.height - Raster.celGrootte;
+    if(this.y >= canvas.height - raster.celGrootte) {
+      this.y = canvas.height - raster.celGrootte;
       this.richting = -1;
       this.snelheid = 0.5;
     }
@@ -272,7 +273,7 @@ class Raket {
   toon() {
     if (this.sprite) {
       image(
-        this.sprite, this.x, this.y, Raster.celGrootte, Raster.celGrootte
+        this.sprite, this.x, this.y, raster.celGrootte, raster.celGrootte
       );
     } else {
       push();
@@ -281,12 +282,12 @@ class Raket {
       stroke("white");
 
       triangle(
-        this.x + Raster.celGrootte / 2, 
+        this.x + raster.celGrootte / 2, 
         this.y,
         this.x,
-        this.y + Raster.celGrootte,
-        this.x + Raster.celGrootte,
-        this.y + Raster.celGrootte
+        this.y + raster.celGrootte,
+        this.x + raster.celGrootte,
+        this.y + raster.celGrootte
       );
 
       pop();
@@ -295,13 +296,13 @@ class Raket {
 
   wordtGeraakt(speler) {
     var d = dist(
-      speler.x + Raster.celGrootte /2,
-      speler.y + Raster.celGrootte /2,
-      this.x + Raster.celGrootte / 2,
-      this.y + Raster.celGrootte / 2
+      speler.x + raster.celGrootte /2,
+      speler.y + raster.celGrootte /2,
+      this.x + raster.celGrootte / 2,
+      this.y + raster.celGrootte / 2
     );
   
-    return d < Raster.celGrootte;
+    return d < raster.celGrootte;
   }
 } 
 
@@ -319,12 +320,12 @@ function setup() {
   breedte = 900 / aantallagen
   hoogte = breedte / 2
 
-  Raster = new Raster(12,18);
+  raster = new Raster(12,18);
 
-  Raster.berekenCelGrootte();
+  raster.berekenCelGrootte();
 
   eve = new Jos();
-  eve.stapGrootte = Raster.celGrootte;
+  eve.stapGrootte = raster.celGrootte;
   for (var b = 0;b < 6;b++) {
     frameEve = loadImage("images/sprites/Eve100px/Eve_" + b + ".png");
     eve.animatie.push(frameEve);
